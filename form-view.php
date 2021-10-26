@@ -26,6 +26,18 @@
             </li>
         </ul>
     </nav>
+    <?php
+    if ($emailErr != "") {
+        echo '<div class="alert alert-danger">' . $emailErr . '</div>';
+    }
+    if ($orderErr != "") {
+        echo '<div class="alert alert-danger">' . $orderErr . '</div>';
+    }
+    if ($successMsg != "") {
+        echo '<div class="alert alert-info">' . $successMsg . '</div>';
+    }
+
+    ?>
     <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>">
         <div class="form-row">
             <div class="form-group col-md-6">
@@ -92,8 +104,8 @@
         <button type="submit" class="btn btn-primary">Order!</button>
     </form>
 
-    <footer>You already ordered <strong>&euro; <?php echo $totalValue ?></strong> in food and drinks.</footer>
-</div>
+    <footer>You already ordered <strong>&euro; <?php echo $_COOKIE["totalValue"] ?></strong> in food and drinks.</footer>
+</div>totalValue;
 
 <style>
     footer {

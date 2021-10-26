@@ -8,14 +8,9 @@ declare(strict_types=1);
 //we are going to use session variables, so we need to enable sessions
 session_start();
 
-if (!isset($_COOKIE["totalSpent"])) {
-    $_SESSION["cookieSpent"] = 0;
-    $cookieSpent = $_SESSION["cookieSpent"];
-    setcookie("totalSpent", strval($cookieSpent), time()+3600, '/');
-} else {
-    $_SESSION["cookieSpent"] += $_SESSION["sessionSpent"];
-    $cookieSpent = $_SESSION["cookieSpent"];
-    setcookie("totalSpent", strval($cookieSpent), time()+3600, '/');
+if (!isset($_COOKIE["totalValue"])) {
+    setcookie("totalValue", "0", time() + 3600, '/');
+    $_COOKIE["totalValue"] = "0";
 }
 
 if (session_status() == PHP_SESSION_NONE) {
@@ -26,10 +21,8 @@ if (session_status() == PHP_SESSION_NONE) {
     $_SESSION["zipcode"] = 0;
 }
 
-$emailErr = $streetErr = $cityErr = $streetNumberErr = $zipcodeErr = "";
+$emailErr = $streetErr = $cityErr = $streetNumberErr = $zipcodeErr = $successMsg = $orderErr = "";
 $deliveryTime = "2 hours";
-$_SESSION["sessionSpent"] = 0;
-
 
 function whatIsHappening() {
     echo '<h2>$_GET</h2>';
@@ -71,16 +64,10 @@ if (isset($_GET["food"])) {
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $errors = 0;
-    (isset($_SESSION["totalValue"])) ? $totalValue = $_SESSION["totalValue"] : $totalValue = 0;
-    $totalValue = $_SESSION["sessionSpent"];
-    if (empty($_POST["email"])) {
-        $emailErr = "E-mail address is required";
+    $totalValue = 0;
+    if (!filter_var($_POST["email"], FILTER_VALIDATE_EMAIL)){
+        $emailErr = "Please enter a valid e-mail address";
         $errors++;
-    }   else {
-        if (!filter_var($_POST["email"], FILTER_VALIDATE_EMAIL)){
-            echo '<div class="alert alert-danger" role="alert">Please enter a valid e-mail address.</div>';
-            $errors++;
-        }
     }
     if (empty($_POST["street"])) {
         $streetErr = "Street name is required";
@@ -103,27 +90,35 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             foreach($_POST["products"] as $product) {
                 $price = $product;
                 $price = (float)$price;
-                $_SESSION["sessionSpent"] += $price;
+                $totalValue += $price;
             }
         }
     } else {
         $errors++;
-        echo '<div class="alert alert-danger" role="alert">Your cart is empty.</div>';
     }
     if (isset($_POST["express_delivery"])) {
         if ($errors == 0) {
             $deliveryTime = "45 minutes";
             $price = $_POST["express_delivery"];
             $price = (float)$price;
-            $_SESSION["sessionSpent"] += $price;
+            $totalValue += $price;
         }
     }
-    if ($errors == 0) {
-        echo '<div class="alert alert-info" role="alert">Your order has been sent!</div>';
+    if ($totalValue == 0) {
+        $errors++;
+        $orderErr = "Your cart is empty";
     }
-    $totalValue += $_SESSION["sessionSpent"];
+    if ($errors == 0) {
+        $successMsg = "Your order has been sent!";
+    }
+    if ($totalValue != 0) {
+        $cookieValue = intval($_COOKIE["totalValue"]);
+        $totalValue += $cookieValue;
+        setcookie("totalValue", strval($totalValue), time() + 3600, '/');
+        $_COOKIE["totalValue"] = strval($totalValue);
+    }
 }
-
+//TODO check does cookie have value, calculate total value that has been spent throughout cookies lifetime, write to cookie
 whatIsHappening();
 
 // #sicco
