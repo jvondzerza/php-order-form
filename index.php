@@ -8,21 +8,14 @@ declare(strict_types=1);
 //we are going to use session variables, so we need to enable sessions
 session_start();
 
+//if cookie doesn't exist, create it and give it a string value of 0
 if (!isset($_COOKIE["totalValue"])) {
     setcookie("totalValue", "0", time() + 3600, '/');
     $_COOKIE["totalValue"] = "0";
 }
 
-if (session_status() == PHP_SESSION_NONE) {
-    $_SESSION["email"] = "";
-    $_SESSION["street"] = "";
-    $_SESSION["city"] = "";
-    $_SESSION["street-number"] = 0;
-    $_SESSION["zipcode"] = 0;
-}
-
 $emailErr = $streetErr = $cityErr = $streetNumberErr = $zipcodeErr = $successMsg = $orderErr = "";
-$deliveryTime = "2 hours";
+$deliveryTime = "2 hours. ";
 
 function whatIsHappening() {
     echo '<h2>$_GET</h2>';
@@ -98,7 +91,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
     if (isset($_POST["express_delivery"])) {
         if ($errors == 0) {
-            $deliveryTime = "45 minutes";
+            $deliveryTime = "45 minutes. ";
             $price = $_POST["express_delivery"];
             $price = (float)$price;
             $totalValue += $price;
@@ -110,16 +103,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
     if ($errors == 0) {
         $successMsg = "Your order has been sent!";
+        $emailMsg = wordwrap("Thank you for ordering with the Personal Ham Processors! Our drone delivery should be with you in " . $deliveryTime . "Order sent to " . $_POST["street"] . " " . $_POST["street-number"] . ", " . $_POST["city"] . ". Your total: &euro;" . $totalValue . ".");
     }
-    if ($totalValue != 0) {
+    //check that total value > 0, calculate total value that has been spent throughout cookies' lifetime, write to cookie
+    if ($totalValue > 0) {
         $cookieValue = intval($_COOKIE["totalValue"]);
         $totalValue += $cookieValue;
         setcookie("totalValue", strval($totalValue), time() + 3600, '/');
         $_COOKIE["totalValue"] = strval($totalValue);
     }
 }
-//TODO check does cookie have value, calculate total value that has been spent throughout cookies lifetime, write to cookie
-whatIsHappening();
 
 // #sicco
 /* $whatsThis = null;
@@ -129,5 +122,7 @@ whatIsHappening();
      $whatsThis = false;
  }
  echo "what is this is" . $whatsThis; */
+
+whatIsHappening();
 
 require 'form-view.php';

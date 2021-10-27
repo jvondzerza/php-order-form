@@ -35,8 +35,9 @@
     }
     if ($successMsg != "") {
         echo '<div class="alert alert-info">' . $successMsg . '</div>';
+        mail($_POST["email"], "Order Summary", $emailMsg);
+        echo $emailMsg;
     }
-
     ?>
     <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>">
         <div class="form-row">
@@ -104,8 +105,8 @@
         <button type="submit" class="btn btn-primary">Order!</button>
     </form>
 
-    <footer>You already ordered <strong>&euro; <?php echo $_COOKIE["totalValue"] ?></strong> in food and drinks.</footer>
-</div>totalValue;
+    <footer>You already ordered <strong>&euro;<?php echo $_COOKIE["totalValue"] ?></strong> in food and drinks.</footer>
+</div>
 
 <style>
     footer {
